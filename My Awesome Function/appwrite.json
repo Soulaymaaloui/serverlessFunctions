@@ -1,0 +1,23 @@
+{
+  "$id": "65f1a54f0c5468e49a2d",
+  "name": "My Appwrite Project",
+  "teamId": "your-team-id",
+  "functions": [
+    {
+      "name": "My Awesome Function",
+      "id": "664fe57517de81b4c082",
+      "runtime": "node-18.0",
+      "path": "functions/my-awesome-function",
+      "entrypoint": "src/main.js",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "tests",
+        "docs",
+        "scripts",
+        "*.log",
+        "config/*.json"
+      ]
+    }
+  ]
+}
