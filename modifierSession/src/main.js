@@ -1,8 +1,8 @@
 import { Client, Databases, ID } from 'node-appwrite';
 
-  const DATABASE_ID = 'your-database-id';
-    const QUIZZES_COLLECTION_ID = 'your-quizzes-collection-id';
-    const SESSIONS_COLLECTION_ID = 'your-sessions-collection-id';
+  const DATABASE_ID = process.env.DATABASE_ID; 
+    const QUIZZES_COLLECTION_ID = process.env.QUESTION_COLLECTION_ID 
+    const SESSIONS_COLLECTION_ID = process.env. SESSIONS_COLLECTION_ID;
 
 export default async (req, res) => {
    const client = new Client()
