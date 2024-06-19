@@ -13,7 +13,7 @@ export default async ({ req, res, log, error }) => {
 
         // Initialize Appwrite Client
         const client = new Client()
-            .setEndpoint('https://cloud1.superverse.tech/v1')
+            .setEndpoint('https://cloud.appwrite.io/v1')
             .setProject(process.env.PROJECT_ID)
             .setKey(process.env.APPWRITE_API_KEY);
 
@@ -61,12 +61,17 @@ export default async ({ req, res, log, error }) => {
 
         // Update session score
         const updatedScore = (session.Score || 0) + pointsEarned;
+        const session1=[]
+    for(session in session1) {
+        session1=sessionId;
+    }
+
         const responseData = {
             timeResponse: new Date().toISOString(),
+            questions: questionId, 
+            session: [sessionId],
             response: response,
-            session: sessionId,
-            question: questionId,
-            Correct: isCorrect,
+            // Correct: isCorrect,
             }
         const responseDocument = await database.createDocument(
             DATABASE_ID,
@@ -74,6 +79,8 @@ export default async ({ req, res, log, error }) => {
             ID.unique(),
             responseData
         );
+        return responseDocument;
+        log(responseDocument);
         // Update session document with new score
         const updatedSession = await database.updateDocument(
             DATABASE_ID,

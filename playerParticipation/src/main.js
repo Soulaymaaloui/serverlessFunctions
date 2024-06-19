@@ -1,64 +1,81 @@
-import { Client, Databases, Query } from 'node-appwrite';
+import { Client, Databases, Query ,ID} from 'node-appwrite';
 
-const DATABASE_ID = process.env.DATABASE_ID; 
-const QUIZ_COLLECTION_ID = process.env.QUIZ_COLLECTION_ID ;
-const SESSION_COLLECTION_ID = process.env.SESSION_COLLECTION_ID 
-
+const DATABASE_ID = process.env.DATABASE_ID;
+const QUIZ_COLLECTION_ID = process.env.QUIZ_COLLECTION_ID;
+const SESSION_COLLECTION_ID = process.env.SESSION_COLLECTION_ID;
 
 export default async ({ req, res, log, error }) => {
-  const client = new Client()
-        .setEndpoint('https://cloud1.superverse.tech/v1')
-        .setProject(process.env.PROJECT_ID) 
-        .setKey(process.env.APPWRITE_API_KEY);
+    try {
+        const { quizId, playerId } = JSON.parse(req.body);
 
-      const database = new Databases(client);
+        // Initialize Appwrite Client
+        const client = new Client()
+            .setEndpoint('https://cloud.appwrite.io/v1')
+            .setProject(process.env.PROJECT_ID)
+            .setKey(process.env.APPWRITE_API_KEY);
 
+        const database = new Databases(client);
 
-  try {
-      const { quizId, playerId }  = JSON.parse(req.body);
+        // Check if the player has already participated in this quiz
+        const query = [
+            Query.equal("playerId", playerId),
+            Query.equal("quiz", quizId)
+        ];
 
-    // Retrieve the quiz document
-    const quizDocument = await database.getDocument(
-      DATABASE_ID , // Database ID
-      QUIZ_COLLECTION_ID , // Collection ID for quizzes
-      quizId
-    );
+        const existingSessions = await database.listDocuments(
+            DATABASE_ID,
+            SESSION_COLLECTION_ID,
+            query,
+            1 // Limit to 1 result
+        );
 
-    if (!quizDocument) {
-      return res.json({
-        success: false,
-        message: "Quiz not found.",
-      });
+        if (existingSessions.documents.length > 0) {
+            // Player has already participated in this quiz
+            return res.json({
+                success: false,
+                message: "Player has already participated in the quiz.",
+            });
+        } else {
+            // Retrieve the quiz document
+            const quizDocument = await database.getDocument(
+                DATABASE_ID,
+                QUIZ_COLLECTION_ID,
+                quizId
+            );
+
+            // Create a new session for the player with initial attributes
+            const sessionData = {
+                quiz: quizId,
+                playerId: playerId,
+                Score: 0, // Initial score
+                isWinner: false, // Initial winner status
+                playTime: null, // Initial play time (can be updated later)
+                completionStatus: "Incomplete", // Initial completion status
+                status: "Active", // Initial session status
+                createdAt: new Date().toISOString(),
+            };
+
+            const sessionDocument = await database.createDocument(
+                DATABASE_ID,
+                SESSION_COLLECTION_ID,
+                ID.unique(),
+                sessionData
+            );
+
+            log(`Session created: ${sessionDocument}`);
+
+            // Player is allowed to participate
+            return res.json({
+                success: true,
+                message: "Player is allowed to participate in the quiz.",
+            });
+        }
+    } catch (e) {
+        log(e);
+        return res.json({
+            success: false,
+            message: "An error occurred while checking participation status or creating session.",
+            error: e.message // Optionally include the error message for debugging
+        });
     }
-    // Build query to check if the player has already participated
-    const query = [
-      Query.equal("userId", [playerId]),
-      Query.equal("quiz", [quizId])
-    ];
-
-    // Check for existing participation
-    const existingSession = await database.listDocuments(
-       DATABASE_ID,
-      SESSION_COLLECTION_ID, 
-      query,
-      1 
-    );
-
-    if (existingSession.documents && existingSession.documents.length > 0) {
-      return res.json({
-        success: false,
-        message: "Player has already participated in this quiz.",
-      });
-    }
-    return res.json({
-      success: true,
-      message: "Player is allowed to participate in the quiz.",
-    });
-  } catch (e) {
-      log(`Error checking participation status:" ${e.message}`);
-    return res.json({
-      success: false,
-      message: "An error occurred while checking participation status.",
-    });
-  }
 };
