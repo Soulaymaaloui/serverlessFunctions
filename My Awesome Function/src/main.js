@@ -28,7 +28,7 @@ const database = new Databases(client);
         log(`User responses: ${userResponses}`);
     // Check if the response is correct
      const isCorrect = userResponses.length === correctOptions.length && 
-            userResponses.every(answer => correctOptions.includes(answer));
+       userResponses.every(answer => correctOptions.includes(answer));
         log(`Correct options: ${correctOptions}`);
         log(`Is the response correct? ${isCorrect}`);
 
@@ -39,8 +39,6 @@ const database = new Databases(client);
       session: sessionId,
       question: questionId,
     };
-    return responseData;
-   log(responseData);
 
     // Store the response in the response collection
     const responsePLayer=await database.createDocument(
@@ -49,7 +47,6 @@ const database = new Databases(client);
       ID.unique(),
       responseData
     );
-
     // Return the result
     return res.json({ success: true, isCorrect });
   } catch (e) {
