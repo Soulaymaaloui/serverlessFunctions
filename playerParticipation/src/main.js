@@ -15,7 +15,7 @@ export default async ({ req, res, log, error }) => {
 
 
   try {
-      const { quizId, playerId } = req.body; 
+      const { quizId, playerId }  = JSON.parse(req.body);
 
     // Retrieve the quiz document
     const quizDocument = await database.getDocument(
