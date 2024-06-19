@@ -55,8 +55,8 @@ export default async ({ req, res, log, error }) => {
         );
         log(`Response stored successfully: ${JSON.stringify(responsePLayer)}`);
 
-        // // Return the result
-        // return res.json({ success: true, isCorrect });
+        // Return the result
+        return res.json({ success: true, isCorrect });
 
     } catch (e) {
         log(e)
