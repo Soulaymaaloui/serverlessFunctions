@@ -11,36 +11,54 @@ export default async ({ req, res, log, error }) => {
         .setProject(process.env.PROJECT_ID) 
         .setKey(process.env.APPWRITE_API_KEY);
 
-      const database = new Databases(client);
-    try {
-    const {questionId, response, sessionId } = req.body;
-      log (req.body)
-      log(`Fetching question with ID: ${questionId}`);
+const database = new Databases(client);
+  try {
+    const { questionId, response, sessionId } = JSON.parse(req.body);
+    log(req.body);
 
-        const question = await database.getDocument(DATABASE_ID, QUESTION_COLLECTION_ID, questionId);
-        log(question);
+    const question = await database.getDocument(
+      DATABASE_ID,
+      QUESTION_COLLECTION_ID,
+      questionId
+    );
+    log(question);
 
-        // Check if the response is correct
-        const isCorrect = question.Correct_Options===response;
-        log(`User response is: ${response}, Correct options: ${question.Correct_Options}`);
+    const correctOptions = Array.isArray(question.Correct_Options) ? question.Correct_Options : [question.Correct_Options];
+    const userResponses = response.split(',').map(item => item.trim());
+        log(`User responses: ${userResponses}`);
+    // Check if the response is correct
+     const isCorrect = userResponses.length === correctOptions.length && 
+            userResponses.every(answer => correctOptions.includes(answer));
+        log(`Correct options: ${correctOptions}`);
         log(`Is the response correct? ${isCorrect}`);
 
-        // Prepare the response data
-        const responseData = {
-            timeResponse: new Date().toISOString(),
-            response: response,
-            session: sessionId,
-            question: questionId,
-        };
+    // Prepare the response data
+    const responseData = {
+      timeResponse: new Date().toISOString(),
+      response: response,
+      session: sessionId,
+      question: questionId,
+    };
+    return responseData;
+   log(responseData);
 
-        // Store the response in the response collection
-        await database.createDocument(DATABASE_ID, RESPONSE_COLLECTION_ID, ID.unique(), responseData);
+    // Store the response in the response collection
+    const responsePLayer=await database.createDocument(
+      DATABASE_ID,
+      RESPONSE_COLLECTION_ID,
+      ID.unique(),
+      responseData
+    );
 
-        // Return the result
-        return res.json({ success: true, isCorrect });
-
-    } catch (e) {
-        log(`Error processing response: ${e.message}`);
-        return res.json({ success: false, message: "Failed to process response", error: e.message });
-    }
+    // Return the result
+    return res.json({ success: true, isCorrect });
+  } catch (e) {
+    log(`Error processing response: ${e.message}`);
+    return res.json({
+      success: false,
+      message: "Failed to process response",
+      error: e.message,
+    });
+  }
 };
+
