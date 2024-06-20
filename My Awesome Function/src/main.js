@@ -43,13 +43,13 @@ export default async ({ req, res, log, error }) => {
 
         const updatedScore = (session.Score || 0) + pointsEarned;
         const session1 = [];
-      for(session in session1) {
-    session1 = sessionId;
+       for(session in session1) {
+        session1 = sessionId;
         }
 
         const responseData = {
-            timeResponse: new Date().toISOString(),
-            questions: questionId,
+             timeResponse: new Date().toISOString(),
+             questions: questionId,
              session: [sessionId],
             response: response,
         };
@@ -59,7 +59,7 @@ export default async ({ req, res, log, error }) => {
 
          // Mettre à jour le document de session avec le nouveau score
         try {
-            const updatedSession = await database.updateDocument(DATABASE_ID, SESSION_COLLECTION_ID, sessionId, { Score: updatedScore });
+            const updatedSession = await database.updateDocument(DATABASE_ID, SESSION_COLLECTION_ID,sessionId, { Score: updatedScore });
             log(`Session score updated successfully. New score: ${updatedScore}`);
             return res.json({ success: true, updatedScore });
         } catch (err) {
