@@ -49,7 +49,7 @@ export default async ({ req, res, log, error }) => {
                 completionStatus: "Incomplete",
                 status: "Active"
             };
-
+              
             try {
                 const sessionDocument = await database.createDocument(
                     DATABASE_ID,
